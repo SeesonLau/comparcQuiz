@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,6 +39,8 @@
             text-align: center;
             border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* Ensure text wraps correctly */
+            word-wrap: break-word; 
         }
         .card-front {
             background-color: white;
@@ -49,11 +51,12 @@
             border: 2px solid #3b82f6;
             transform: rotateY(180deg);
         }
+        /* Default sizes (Mobile First) */
         .question-text {
-            font-size: 1.5rem;
+            font-size: 1.25rem; /* text-xl */
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         .options-list {
             list-style: none;
@@ -63,8 +66,8 @@
             text-align: left;
         }
         .options-list li {
-            padding: 0.5rem 0;
-            font-size: 1.125rem;
+            padding: 0.4rem 0;
+            font-size: 1rem; /* text-base */
             color: #374151;
         }
         .answer-box {
@@ -72,19 +75,34 @@
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
-            font-size: 1.5rem;
+            font-size: 1.25rem; /* text-xl */
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        /* Desktop/Tablet adjustments */
+        @media (min-width: 768px) {
+            .question-text {
+                font-size: 1.5rem; /* md:text-2xl */
+                margin-bottom: 1.5rem;
+            }
+            .options-list li {
+                font-size: 1.125rem; /* md:text-lg */
+            }
+            .answer-box {
+                font-size: 1.5rem; /* md:text-2xl */
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Intel 8086 Quiz Card</h1>
-        <p id="test-type" class="text-lg text-center font-medium text-blue-600 mb-6"></p>
+        <!-- Title and Test Type -->
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">Intel 8086 Quiz Card</h1>
+        <p id="test-type" class="text-base md:text-lg text-center font-medium text-blue-600 mb-6"></p>
         
-        <!-- Scene for 3D effect -->
+        <!-- Scene for 3D effect: Fixed height on mobile, larger on desktop -->
         <div class="scene w-full h-80 md:h-96">
             <!-- Card -->
             <div id="flashcard" class="card cursor-pointer">
@@ -98,9 +116,9 @@
                 <!-- Back of the card -->
                 <div class="card-face card-back">
                     <div id="card-back-content">
-                        <p class="text-xl font-bold text-gray-700 mb-2">Correct Answer:</p>
+                        <p class="text-lg md:text-xl font-bold text-gray-700 mb-2">Correct Answer:</p>
                         <div id="answer-display" class="answer-box"></div>
-                        <p class="text-lg text-gray-800" id="explanation-text"></p>
+                        <p class="text-base md:text-lg text-gray-800" id="explanation-text"></p>
                     </div>
                 </div>
             </div>
@@ -109,22 +127,22 @@
         <!-- Navigation -->
         <div class="flex items-center justify-between mt-8">
             <!-- Prev Button -->
-            <button id="prev-btn" class="flex items-center justify-center px-6 py-3 bg-white rounded-lg shadow-md text-gray-700 font-semibold border border-gray-300 hover:bg-gray-50 transition duration-150 ease-in-out">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <button id="prev-btn" class="flex items-center justify-center px-4 py-2 md:px-6 md:py-3 text-sm md:text-base bg-white rounded-lg shadow-md text-gray-700 font-semibold border border-gray-300 hover:bg-gray-50 transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Previous
             </button>
 
             <!-- Card Counter -->
-            <div id="card-counter" class="text-lg font-medium text-gray-600">
+            <div id="card-counter" class="text-sm md:text-lg font-medium text-gray-600">
                 1 / 50
             </div>
 
             <!-- Next Button -->
-            <button id="next-btn" class="flex items-center justify-center px-6 py-3 bg-blue-600 rounded-lg shadow-md text-white font-semibold hover:bg-blue-700 transition duration-150 ease-in-out">
+            <button id="next-btn" class="flex items-center justify-center px-4 py-2 md:px-6 md:py-3 text-sm md:text-base bg-blue-600 rounded-lg shadow-md text-white font-semibold hover:bg-blue-700 transition duration-150 ease-in-out">
                 Next
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 ml-1 md:ml-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
             </button>
@@ -613,6 +631,7 @@
                 let html = '';
                 for (const key in options) {
                     if (options.hasOwnProperty(key)) {
+                        // Use responsive text size: text-sm on mobile, md:text-base on larger screens
                         html += `<li class="text-sm md:text-base font-mono">(${key.toUpperCase()}) ${options[key]}</li>`;
                     }
                 }
