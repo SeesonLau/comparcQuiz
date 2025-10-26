@@ -1,0 +1,718 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8086 Processor Quiz</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the 3D card flip */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .scene {
+            perspective: 1000px;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Safari */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card-front {
+            background-color: white;
+            border: 2px solid #3b82f6;
+        }
+        .card-back {
+            background-color: #e0f2fe; /* Light blue background for answer */
+            border: 2px solid #3b82f6;
+            transform: rotateY(180deg);
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+        }
+        .options-list li {
+            padding: 0.5rem 0;
+            font-size: 1.125rem;
+            color: #374151;
+        }
+        .answer-box {
+            background-color: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Intel 8086 Quiz Card</h1>
+        <p id="test-type" class="text-lg text-center font-medium text-blue-600 mb-6"></p>
+        
+        <!-- Scene for 3D effect -->
+        <div class="scene w-full h-80 md:h-96">
+            <!-- Card -->
+            <div id="flashcard" class="card cursor-pointer">
+                <!-- Front of the card -->
+                <div class="card-face card-front">
+                    <p id="card-front-text" class="question-text"></p>
+                    <ul id="options-list" class="options-list">
+                        <!-- Options injected here -->
+                    </ul>
+                </div>
+                <!-- Back of the card -->
+                <div class="card-face card-back">
+                    <div id="card-back-content">
+                        <p class="text-xl font-bold text-gray-700 mb-2">Correct Answer:</p>
+                        <div id="answer-display" class="answer-box"></div>
+                        <p class="text-lg text-gray-800" id="explanation-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center justify-between mt-8">
+            <!-- Prev Button -->
+            <button id="prev-btn" class="flex items-center justify-center px-6 py-3 bg-white rounded-lg shadow-md text-gray-700 font-semibold border border-gray-300 hover:bg-gray-50 transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Previous
+            </button>
+
+            <!-- Card Counter -->
+            <div id="card-counter" class="text-lg font-medium text-gray-600">
+                1 / 50
+            </div>
+
+            <!-- Next Button -->
+            <button id="next-btn" class="flex items-center justify-center px-6 py-3 bg-blue-600 rounded-lg shadow-md text-white font-semibold hover:bg-blue-700 transition duration-150 ease-in-out">
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizData = [
+                // --- Test I: Multiple Choice Questions (1-25) ---
+                {
+                    type: 'MCQ',
+                    question: "What is the size of the 8086's address bus and its maximum addressable memory capacity?",
+                    options: {
+                        a: "16-bit, 64 KB",
+                        b: "20-bit, 1 MB",
+                        c: "32-bit, 4 GB",
+                        d: "16-bit, 1 MB",
+                    },
+                    answer: 'B',
+                    explanation: "The 8086 uses a 20-bit address bus to access 2^20 memory locations, which equals 1 MB (00000H to FFFFFH)."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the width of the data bus in the Intel 8086 microprocessor?",
+                    options: {
+                        a: "8 bits",
+                        b: "16 bits",
+                        c: "20 bits",
+                        d: "32 bits",
+                    },
+                    answer: 'B',
+                    explanation: "The 8086 is a 16-bit microprocessor with a 16-bit data bus, allowing it to read/write 8 or 16 bits at a time."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the package type and pin count for the 8086?",
+                    options: {
+                        a: "24-pin Quad Flat Package (QFP)",
+                        b: "64-pin Pin Grid Array (PGA)",
+                        c: "40-pin Dual In-line Package (DIP)",
+                        d: "28-pin Small Outline Integrated Circuit (SOIC)",
+                    },
+                    answer: 'C',
+                    explanation: "The 8086 is available in a 40-pin Dual In-line Package (DIP)."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What logic level must be applied to the $\\text{MN}/\\overline{\\text{MX}}$ input pin to select Maximum Mode operation?",
+                    options: {
+                        a: "Logic '1'",
+                        b: "Logic '0'",
+                        c: "A pulse train",
+                        d: "A high impedance state",
+                    },
+                    answer: 'B',
+                    explanation: "Maximum mode (multi-microprocessor configuration) is selected by applying logic '0' (ground) to the $\\text{MN}/\\overline{\\text{MX}}$ pin."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which component of the 8086 is responsible for generating the 20-bit physical address?",
+                    options: {
+                        a: "Execution Unit (EU)",
+                        b: "Control Unit",
+                        c: "Bus Interface Unit (BIU)",
+                        d: "Arithmetic Logic Unit (ALU)",
+                    },
+                    answer: 'C',
+                    explanation: "The Bus Interface Unit (BIU) contains the Address Adder which generates the 20-bit physical address."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the second step in the microprocessor's instruction execution sequence?",
+                    options: {
+                        a: "Fetch",
+                        b: "Decode",
+                        c: "Execute",
+                        d: "Write Back",
+                    },
+                    answer: 'B',
+                    explanation: "The sequence is Fetch, Decode, and then Execute."
+                },
+                {
+                    type: 'MCQ',
+                    question: "How many bytes of pre-fetch instruction queue does the BIU maintain to support pipelining?",
+                    options: {
+                        a: "4 bytes",
+                        b: "6 bytes",
+                        c: "8 bytes",
+                        d: "16 bytes",
+                    },
+                    answer: 'B',
+                    explanation: "The BIU maintains a 6-byte pre-fetch instruction queue, which exhibits FIFO behavior."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the size of each segment in the 8086 memory segmentation scheme?",
+                    options: {
+                        a: "32 KB",
+                        b: "16 KB",
+                        c: "64 KB",
+                        d: "1 MB",
+                    },
+                    answer: 'C',
+                    explanation: "The 1 MB memory is divided into segments, each having a maximum size of 64 KB."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which segment register holds the address of the string data for string instructions (usually as the destination)?",
+                    options: {
+                        a: "Code Segment (CS)",
+                        b: "Data Segment (DS)",
+                        c: "Stack Segment (SS)",
+                        d: "Extra Segment (ES)",
+                    },
+                    answer: 'D',
+                    explanation: "The Extra Segment (ES) register typically contains the address of the string data, particularly as the destination for string operations."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which pointer or index register provides the default offset address for the Code Segment (CS)?",
+                    options: {
+                        a: "Stack Pointer (SP)",
+                        b: "Base Pointer (BP)",
+                        c: "Destination Index (DI)",
+                        d: "Instruction Pointer (IP)",
+                    },
+                    answer: 'D',
+                    explanation: "The Instruction Pointer (IP) holds the 16-bit offset address for the Code Segment, pointing to the next instruction."
+                },
+                {
+                    type: 'MCQ',
+                    question: "How many total registers that are accessible to the programmer does the 8086 have?",
+                    options: {
+                        a: "10",
+                        b: "12",
+                        c: "14",
+                        d: "16",
+                    },
+                    answer: 'C',
+                    explanation: "The 8086 has a total of fourteen 16-bit registers accessible to the programmer (General Purpose, Segment, Pointer, Index, and Flag/IP)."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which register is known as the Base Register and is primarily used to store the starting base address within the Data Segment?",
+                    options: {
+                        a: "AX",
+                        b: "BX",
+                        c: "CX",
+                        d: "DX",
+                    },
+                    answer: 'B',
+                    explanation: "BX is the Base Register. It is used to store the starting base address of the memory area within the data segment."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which register is referred to as the Counter Register, holding the count value in $\\text{SHIFT}$, $\\text{ROTATE}$, and $\\text{LOOP}$ instructions?",
+                    options: {
+                        a: "AX",
+                        b: "BX",
+                        c: "CX",
+                        d: "DX",
+                    },
+                    answer: 'C',
+                    explanation: "CX is the Counter Register, and its low byte (CL) is often used for count values in iterative or bit manipulation instructions."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which pointer register is used during instructions like $\\text{PUSH}$, $\\text{POP}$, $\\text{CALL}$, and $\\text{RET}$?",
+                    options: {
+                        a: "Base Pointer (BP)",
+                        b: "Stack Pointer (SP)",
+                        c: "Source Index (SI)",
+                        d: "Destination Index (DI)",
+                    },
+                    answer: 'B',
+                    explanation: "The Stack Pointer (SP) points to the program stack in the Stack Segment and is essential for stack operations."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which index register holds the offset address in the Data Segment during string operations for source data?",
+                    options: {
+                        a: "Base Pointer (BP)",
+                        b: "Stack Pointer (SP)",
+                        c: "Source Index (SI)",
+                        d: "Destination Index (DI)",
+                    },
+                    answer: 'C',
+                    explanation: "Source Index (SI) holds the offset address in the Data Segment for the source operand in string operations."
+                },
+                {
+                    type: 'MCQ',
+                    question: "How many active flag bits are there in the 16-bit Flag Register of the 8086 microprocessor?",
+                    options: {
+                        a: "6",
+                        b: "9",
+                        c: "12",
+                        d: "16",
+                    },
+                    answer: 'B',
+                    explanation: "The 8086 Flag Register is 16-bit, but only 9 bits are actively used for flags (6 Status/Conditional and 3 Control flags)."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which flag is considered a Control Flag in the 8086 Flag Register?",
+                    options: {
+                        a: "Zero Flag (ZF)",
+                        b: "Carry Flag (CF)",
+                        c: "Interrupt Flag (IF)",
+                        d: "Sign Flag (SF)",
+                    },
+                    answer: 'C',
+                    explanation: "The Interrupt Flag (IF), Trap Flag (TF), and Direction Flag (DF) are the three Control Flags."
+                },
+                {
+                    type: 'MCQ',
+                    question: "In which addressing mode is the operand specified directly within the instruction itself?",
+                    options: {
+                        a: "Register Addressing",
+                        b: "Direct Addressing",
+                        c: "Immediate Addressing",
+                        d: "Register Indirect Addressing",
+                    },
+                    answer: 'C',
+                    explanation: "In Immediate Addressing, the operand is an 8-bit or 16-bit value specified in the instruction itself."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the effective address calculation for Based Indexed Addressing Mode?",
+                    options: {
+                        a: "$[BX] + [DI]$",
+                        b: "$[BX] + [SI]$",
+                        c: "$[BP] + [SI]$",
+                        d: "$[BX] \\text{ or } [BP] + [SI] \\text{ or } [DI]$",
+                    },
+                    answer: 'D',
+                    explanation: "Effective Address (Offset) = $[BX \\text{ or } BP] + [SI \\text{ or } DI]$. The combination depends on the segment accessed."
+                },
+                {
+                    type: 'MCQ',
+                    question: "The instruction $\\text{PUSH}$ belongs to which classification of the instruction set?",
+                    options: {
+                        a: "Arithmetic Instructions",
+                        b: "Bit Manipulation Instructions",
+                        c: "Data Transfer Instructions",
+                        d: "Processor Control Instructions",
+                    },
+                    answer: 'C',
+                    explanation: "PUSH, POP, MOV, and XCHG are all classified as Data Transfer Instructions."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which instruction is used to compare string bytes or words?",
+                    options: {
+                        a: "MOVS",
+                        b: "SCAS",
+                        c: "CMPS",
+                        d: "REP",
+                    },
+                    answer: 'C',
+                    explanation: "CMPS (Compare String) is used to compare string data. $\\text{MOVS}$ is for moving strings, and $\\text{SCAS}$ is for scanning strings."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What is the jump condition for the conditional jump instruction $\\text{JNZ}$ ('Jump if Not Zero')?",
+                    options: {
+                        a: "$CF=0$",
+                        b: "$ZF=1$",
+                        c: "$ZF=0$",
+                        d: "$PF=1$",
+                    },
+                    answer: 'C',
+                    explanation: "JNZ (Jump if Not Zero) executes the jump if the Zero Flag ($\text{ZF}$) is equal to 0."
+                },
+                {
+                    type: 'MCQ',
+                    question: "Which instruction is classified as a Logical instruction under Bit Manipulation?",
+                    options: {
+                        a: "SHR",
+                        b: "ROL",
+                        c: "NOT",
+                        d: "SAL",
+                    },
+                    answer: 'C',
+                    explanation: "NOT, AND, OR, and XOR are Logical instructions. SHR, ROL, and SAL are Shift/Rotate instructions."
+                },
+                {
+                    type: 'MCQ',
+                    question: "The 8086 microprocessor uses which type of transistor technology?",
+                    options: {
+                        a: "CMOS",
+                        b: "NMOS",
+                        c: "TTL",
+                        d: "HMOS",
+                    },
+                    answer: 'D',
+                    explanation: "The 8086 is a 16-bit, N-channel, HMOS microprocessor."
+                },
+                {
+                    type: 'MCQ',
+                    question: "What register holds the status of the result generated by the ALU?",
+                    options: {
+                        a: "Instruction Pointer (IP)",
+                        b: "Stack Pointer (SP)",
+                        c: "General Purpose Register (AX)",
+                        d: "Flag Register",
+                    },
+                    answer: 'D',
+                    explanation: "The Flag Register holds the status (conditional and control flags) of the results from ALU operations."
+                },
+
+                // --- Test II: True or False Questions (26-50) ---
+                {
+                    type: 'TF',
+                    question: "True or False: The 8086 microprocessor is an enhanced version of the Intel 8080 microprocessor.",
+                    answer: 'False',
+                    explanation: "The 8086 is the enhanced version of the Intel **8085** microprocessor."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The 16-bit data bus allows the 8086 to read/write data either 16 bits or 8 bits at a time.",
+                    answer: 'True',
+                    explanation: "The 16-bit data bus supports both 8-bit and 16-bit data transfers."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The 8086 was designed by Intel in 1976.",
+                    answer: 'True',
+                    explanation: "The document states the 8086 was designed by Intel in 1976 and introduced in 1978."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: Minimum Mode is selected by applying Logic 0 to the $\\text{MN}/\\overline{\\text{MX}}$ pin.",
+                    answer: 'False',
+                    explanation: "Minimum Mode is selected by applying **Logic 1**. Logic 0 selects Maximum Mode."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: Pipelining in the 8086 involves the Fetch Stage and the Decode Stage.",
+                    answer: 'False',
+                    explanation: "Pipelining involves the **Fetch Stage** and the **Execute Stage**."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The ALU is located within the Bus Interface Unit (BIU).",
+                    answer: 'False',
+                    explanation: "The ALU is located within the **Execution Unit (EU)**."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: Segmentation is the process of dividing the available memory space into 32 KB 'chunks' called segments.",
+                    answer: 'False',
+                    explanation: "The segments are 64 KB 'chunks'."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Data Segment holds the instruction codes of a program.",
+                    answer: 'False',
+                    explanation: "The **Code Segment** holds the instruction codes. The Data Segment holds variables and constants."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The offset address is 16-bit wide and is provided by an associated pointer or index register.",
+                    answer: 'True',
+                    explanation: "The 16-bit offset address combines with the shifted 16-bit segment address to form the 20-bit physical address."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The 6-byte pre-fetch queue follows a Last-In, First-Out (LIFO) behavior.",
+                    answer: 'False',
+                    explanation: "The queue follows a **First-In, First-Out (FIFO)** behavior."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The $\\text{AH}$ and $\\text{AL}$ registers combine to form the 16-bit $\\text{DX}$ (Data) register.",
+                    answer: 'False',
+                    explanation: "$\\text{AH}$ and $\\text{AL}$ combine to form the 16-bit **AX (Accumulator) register**."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The $\\text{DX}$ register can be divided into two 8-bit registers, $\\text{DH}$ and $\\text{DL}$.",
+                    answer: 'True',
+                    explanation: "All four general purpose registers (AX, BX, CX, DX) can be split into high ($\text{H}$) and low ($\text{L}$) 8-bit components."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Base Pointer (BP) is used to access random locations of the stack segment.",
+                    answer: 'True',
+                    explanation: "BP holds the offset address in the stack segment and is used to access random locations on the stack."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Stack Segment register is usually used to store information about the memory segment itself, not data.",
+                    answer: 'True',
+                    explanation: "Segment registers hold the upper 16 bits of the segment's starting address, defining the segment's location in memory."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Carry Flag (CF) is one of the three Control Flags.",
+                    answer: 'False',
+                    explanation: "The Carry Flag ($\text{CF}$) is a **Status/Conditional Flag**."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Flag Register is program invisible.",
+                    answer: 'False',
+                    explanation: "The Flag Register is considered **program visible** because its status is manipulated and checked by instructions like conditional jumps."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: $\\text{ADD}$, $\\text{SUB}$, and $\\text{CMP}$ are classified as Arithmetic Instructions.",
+                    answer: 'True',
+                    explanation: "These instructions perform addition, subtraction, and comparison (subtraction without storing the result) respectively."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: In $\\text{Immediate Addressing}$ mode, the operand's offset is given in the instruction as a displacement element.",
+                    answer: 'False',
+                    explanation: "This describes **Direct Addressing** mode. In Immediate Addressing, the operand *value* is specified in the instruction itself."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: In Based Addressing mode, the Base Register $\\text{BP}$ is used for addressing data in the Data Segment.",
+                    answer: 'False',
+                    explanation: "In Based Addressing, $\\text{BX}$ is used for the Data Segment; $\\text{BP}$ is used for the **Stack Segment**."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The $\\text{SAL}$ and $\\text{SHL}$ instructions are classified as $\\text{Rotate}$ instructions.",
+                    answer: 'False',
+                    explanation: "$\\text{SAL}$ (Shift Arithmetic Left) and $\\text{SHL}$ (Shift Logical Left) are **Shift** instructions."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: Conditional Jump Instructions like $\\text{JA}$ ('Jump if Above') check the status of the flags to determine if the jump should occur.",
+                    answer: 'True',
+                    explanation: "Conditional Jump instructions depend on the state of the flags (e.g., $\\text{CF}$, $\\text{ZF}$) set by previous operations."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The $\\text{REP}$ instruction is a String Instruction used for repeating a string operation (like $\\text{MOVS}$ or $\\text{CMPS}$).",
+                    answer: 'True',
+                    explanation: "REP is a prefix that causes the subsequent string instruction to be repeated until the $\\text{CX}$ register becomes zero or a condition is met."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Processor Control Instructions are mainly used to modify the conditional flags.",
+                    answer: 'False',
+                    explanation: "Processor Control Instructions are mainly used to modify the **Control Flags** ($\\text{TF}$, $\\text{IF}$, $\\text{DF}$) or for processor synchronization."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The address range for the 1 MB addressable memory is $00000\text{H}$ to $\text{FFFFFH}$.",
+                    answer: 'True',
+                    explanation: "This is the full 20-bit address range of the 8086 processor."
+                },
+                {
+                    type: 'TF',
+                    question: "True or False: The Instruction Pointer (IP) is considered a Segment Register.",
+                    answer: 'False',
+                    explanation: "The $\\text{IP}$ is a dedicated **Pointer Register** (or Instruction Pointer register), separate from the four Segment Registers (CS, DS, SS, ES)."
+                },
+            ];
+
+            // --- 2. State ---
+            let currentCardIndex = 0;
+            let isFlipped = false;
+
+            // --- 3. DOM References ---
+            const card = document.getElementById('flashcard');
+            const cardFrontText = document.getElementById('card-front-text');
+            const optionsList = document.getElementById('options-list');
+            const answerDisplay = document.getElementById('answer-display');
+            const explanationText = document.getElementById('explanation-text');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const cardCounter = document.getElementById('card-counter');
+            const testType = document.getElementById('test-type');
+
+            // --- 4. Functions ---
+            
+            /**
+             * Generates the HTML for the options list for MCQs.
+             */
+            function renderOptions(options) {
+                let html = '';
+                for (const key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        html += `<li class="text-sm md:text-base font-mono">(${key.toUpperCase()}) ${options[key]}</li>`;
+                    }
+                }
+                optionsList.innerHTML = html;
+            }
+
+            /**
+             * Updates the card content and counter, and resets flip state.
+             */
+            function showCard(index) {
+                const cardData = quizData[index];
+                
+                // Set Test Type
+                if (index < 25) {
+                    testType.textContent = "Test I: Multiple Choice Questions";
+                } else {
+                    testType.textContent = "Test II: True or False Questions";
+                }
+
+                // --- Card Front (Question) ---
+                cardFrontText.textContent = cardData.question;
+                
+                if (cardData.type === 'MCQ') {
+                    // MCQ: Show question and options
+                    optionsList.classList.remove('hidden');
+                    renderOptions(cardData.options);
+                    optionsList.style.maxWidth = '500px'; 
+
+                } else {
+                    // T/F: Show only question
+                    optionsList.classList.add('hidden');
+                }
+
+                // --- Card Back (Answer) ---
+                answerDisplay.textContent = cardData.answer;
+                explanationText.textContent = cardData.explanation;
+                
+                // Color coding for back of T/F cards
+                if (cardData.type === 'TF') {
+                    if (cardData.answer === 'True') {
+                         answerDisplay.classList.remove('bg-red-500');
+                         answerDisplay.classList.add('bg-green-600');
+                    } else {
+                         answerDisplay.classList.remove('bg-green-600');
+                         answerDisplay.classList.add('bg-red-500');
+                    }
+                } else {
+                    // Reset MCQ color to default success color
+                    answerDisplay.classList.remove('bg-red-500');
+                    answerDisplay.classList.add('bg-green-600');
+                }
+
+                // Update counter
+                cardCounter.textContent = `${index + 1} / ${quizData.length}`;
+                
+                // Reset flip state
+                if (isFlipped) {
+                    card.classList.remove('is-flipped');
+                    isFlipped = false;
+                }
+            }
+
+            /**
+             * Toggles the flip state of the card.
+             */
+            function flipCard() {
+                card.classList.toggle('is-flipped');
+                isFlipped = !isFlipped;
+            }
+
+            /**
+             * Shows the next card in the deck, looping at the end.
+             */
+            function nextCard() {
+                currentCardIndex++;
+                if (currentCardIndex >= quizData.length) {
+                    currentCardIndex = 0; // Loop back to the start
+                }
+                showCard(currentCardIndex);
+            }
+
+            /**
+             * Shows the previous card in the deck, looping at the start.
+             */
+            function prevCard() {
+                currentCardIndex--;
+                if (currentCardIndex < 0) {
+                    currentCardIndex = quizData.length - 1; // Loop to the end
+                }
+                showCard(currentCardIndex);
+            }
+
+            // --- 5. Event Listeners ---
+            card.addEventListener('click', flipCard);
+            nextBtn.addEventListener('click', nextCard);
+            prevBtn.addEventListener('click', prevCard);
+
+            // --- 6. Initialization ---
+            showCard(currentCardIndex);
+        });
+    </script>
+</body>
+</html>
